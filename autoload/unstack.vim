@@ -1,4 +1,4 @@
-"Initialization: {{{
+"Initialization: 
 if !exists("s:unstack_signs")
   let s:unstack_signs = {}
 endif
@@ -8,8 +8,8 @@ augroup unstack_sign_clear
   autocmd!
   autocmd TabEnter * call unstack#RemoveSignsFromClosedTabs()
 augroup end 
-"}}}
-"unstack#Unstack(selection_type) called by hotkeys {{{
+
+"unstack#Unstack(selection_type) called by hotkeys 
 function! unstack#Unstack(selection_type)
   let stack = unstack#ExtractFiles(a:selection_type)
   if len(stack) > 0
@@ -23,8 +23,8 @@ function! unstack#Unstack(selection_type)
     echoerr "No stack trace found!"
   endif
 endfunction
-"}}}
-"unstack#UnstackFromText(text) call unstack with text as input {{{
+
+"unstack#UnstackFromText(text) call unstack with text as input 
 function! unstack#UnstackFromText(text)
   let stack = unstack#ExtractFilesFromText(a:text)
   if len(stack) > 0
@@ -38,9 +38,9 @@ function! unstack#UnstackFromText(text)
     echoerr "No stack trace found!"
   endif
 endfunction
-"}}}
+
 "Extraction:
-"unstack#ExtractFiles(selection_type) extract files and line numbers {{{
+"unstack#ExtractFiles(selection_type) extract files and line numbers 
 function! unstack#ExtractFiles(selection_type)
   if &buftype == "quickfix"
     let fileList = unstack#ExtractFilesFromQuickfix(a:selection_type)
@@ -50,8 +50,8 @@ function! unstack#ExtractFiles(selection_type)
   endif
   return fileList
 endfunction
-"}}}
-"unstack#ExtractFilesFromQuickfix(type) extract files from selected text or normal cmd range {{{
+
+"unstack#ExtractFilesFromQuickfix(type) extract files from selected text or normal cmd range 
 function! unstack#ExtractFilesFromQuickfix(type)
   if a:type ==# "v" || a:type ==# "V"
     let marks = ["'<", "'>"]
@@ -63,15 +63,18 @@ function! unstack#ExtractFilesFromQuickfix(type)
   let file_list = []
   while start_line <= stop_line
     let qfline = getqflist()[start_line]
-    let fname = bufname(qfline["bufnr"])
+    "let fname = bufname(qfline["bufnr"])
     let lineno = qfline["lnum"]
+    " fname is something like \"/home/xling/job/codes/indonesia_ec/ec_management_mt/venv/bin/scrapy\"
+    let fname = matchstr(qfline["text"],'".*"') 
+    let fname = fname[1:-2]
     call add(file_list, [fname, lineno])
     let start_line = start_line + 1
   endwhile
   return file_list
 endfunction
-"}}}
-"unstack#GetSelectedText(selection_type) extract selected text {{{
+
+"unstack#GetSelectedText(selection_type) extract selected text 
 function! unstack#GetSelectedText(selection_type)
   "save these values because we have to change them
   let sel_save = &selection
@@ -101,8 +104,8 @@ function! unstack#GetSelectedText(selection_type)
   "return the text
   return selected_text
 endfunction
-"}}}
-"unstack#ExtractFilesFromText(stacktrace) extract files and lines from a stacktrace {{{
+
+"unstack#ExtractFilesFromText(stacktrace) extract files and lines from a stacktrace 
 "return [[file1, line1], [file2, line2] ... ] from a stacktrace 
 "tries each extractor in order and stops when an extractor returns a non-empty
 "stack
@@ -115,9 +118,9 @@ function! unstack#ExtractFilesFromText(text)
   endfor
   return []
 endfunction
-"}}}
+
 "Opening:
-"unstack#PopulateQuickfix(stack) set quickfix list to extracted files{{{
+"unstack#PopulateQuickfix(stack) set quickfix list to extracted files
 function! unstack#PopulateQuickfix(stack)
   let qflist = []
   for [filepath, lineno] in a:stack
@@ -125,8 +128,8 @@ function! unstack#PopulateQuickfix(stack)
   endfor
   call setqflist(qflist)
 endfunction
-"}}}
-"unstack#OpenStackTrace(files) open extracted files in new tab {{{
+
+"unstack#OpenStackTrace(files) open extracted files in new tab 
 "files: [[file1, line1], [file2, line2] ... ] from a stacktrace
 function! unstack#OpenStackTrace(files)
   "disable redraw when opening files
@@ -168,8 +171,8 @@ function! unstack#OpenStackTrace(files)
     let &scrolloff = old_scrolloff
   endif
 endfunction
-"}}}
-"unstack#GetOpenTabIds() get unstack id's for current tabs {{{
+
+"unstack#GetOpenTabIds() get unstack id's for current tabs 
 function! unstack#GetOpenTabIds()
   let curTab = tabpagenr()
   "determine currently open tabs
@@ -179,16 +182,16 @@ function! unstack#GetOpenTabIds()
   execute "tabnext" curTab 
   return open_tab_ids
 endfunction
-"}}}
-"unstack#RemoveSigns(tabId) remove signs from the files initially opened in a tab {{{
+
+"unstack#RemoveSigns(tabId) remove signs from the files initially opened in a tab 
 function! unstack#RemoveSigns(tabId)
   for sign_id in s:unstack_signs[a:tabId]
     execute "sign unplace" sign_id
   endfor
   unlet s:unstack_signs[a:tabId]
 endfunction
-"}}}
-"unstack#RemoveSignsFromClosedTabs() remove signs that were placed in tabs that are {{{
+
+"unstack#RemoveSignsFromClosedTabs() remove signs that were placed in tabs that are 
 "now closed
 function! unstack#RemoveSignsFromClosedTabs()
   let openTabIds = unstack#GetOpenTabIds()
@@ -200,8 +203,8 @@ function! unstack#RemoveSignsFromClosedTabs()
     endif
   endfor
 endfunction
-"}}}
-"unstack#GetLayout() returns layout setting ("portrait"/"landscape") {{{
+
+"unstack#GetLayout() returns layout setting ("portrait"/"landscape") 
 function! unstack#GetLayout()
   let layout = get(g:, "unstack_layout", "landscape")
   if layout == "landscape" || layout == "portrait"
@@ -210,8 +213,8 @@ function! unstack#GetLayout()
     throw "g:unstack_layout must be portrait or landscape"
   endif
 endfunction
-"}}}
-"unstack#MoveToLine move cursor to the line and put it in the right part of the screen {{{
+
+"unstack#MoveToLine move cursor to the line and put it in the right part of the screen 
 let s:movement_cmd = {}
 let s:movement_cmd["top"] = "z+"
 let s:movement_cmd["middle"] = "z."
@@ -219,8 +222,8 @@ let s:movement_cmd["bottom"] = "z-"
 function! unstack#MoveToLine(lineno)
     execute "normal!" a:lineno . s:movement_cmd[g:unstack_vertical_alignment]
 endfunction
-"}}}
-"unstack#SplitWindow() split window horizontally/vertically based on layout{{{
+
+"unstack#SplitWindow() split window horizontally/vertically based on layout
 function! unstack#SplitWindow()
   let layout = unstack#GetLayout()
   if layout == "landscape"
@@ -230,5 +233,5 @@ function! unstack#SplitWindow()
   endif
   execute "botright" split_cmd
 endfunction
-"}}}
-" vim: et sw=2 sts=2 foldmethod=marker foldmarker={{{,}}}
+
+" vim: et sw=2 sts=2 foldmethod=marker foldmarker=,
